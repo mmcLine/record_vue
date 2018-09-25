@@ -28,8 +28,10 @@
                             HTML
                             <el-progress :percentage="1.1" color="#f56c6c"></el-progress> -->
                             <template>
-                              <el-radio v-model="radio" label="1">备选项</el-radio>
-                              <el-radio v-model="radio" label="2">备选项</el-radio>
+                              <el-radio v-for="item in userscope" :label="item.label" :key="item.label"
+                              :value="item.label" v-model="checkeduser"
+                              @change="changeRadio">
+                                {{item.labelName}}</el-radio>
                             </template>
                         </el-card>
                     </el-col>
@@ -107,7 +109,8 @@ export default {
   data() {
     return {
       name: localStorage.getItem("username"),
-      userscope:[],
+      checkeduser: parseInt(localStorage.getItem("userid")),
+      userscope: [],
       totalAmt: 0,
       totalNum: 0,
       monthAmt: 0,
@@ -145,6 +148,8 @@ export default {
     this.drawChart();
     this.Calculation();
     this.loginRecord();
+    this.getUserScope();
+    this.getCheckedUser();
   },
   computed: {
     role() {
@@ -152,25 +157,52 @@ export default {
     }
   },
   methods: {
-   async getUserScope(){
-    const result = await postHttp({ url: "/record/home/calculation" });
-        if (result) {
-          this.monthAmt = result.inner.monthamt;
-          this.totalAmt = result.inner.totalamt;
-          this.totalNum = result.inner.totalcount;
-        }
+    async changeRadio(value) {
+      var params = {
+        user: value
+      };
+      const result = await postHttp({
+        url: "/record/home/updateScope",
+        params
+      });
+      if (result) {
+        this.drawChart();
+    this.Calculation();
+    this.loginRecord();
+        this.$message({
+          message: "修改查询范围成功",
+          type: "success"
+        });
+      } else {
+        this.$message({
+          message: "修改查询范围失败",
+          type: "error"
+        });
+      }
+    },
+    async getUserScope() {
+      const result = await postHttp({ url: "/record/home/scopList" });
+      if (result) {
+        this.userscope = result.inner;
+      }
+    },
+      async getCheckedUser() {
+      const result = await postHttp({ url: "/record/home/getCheckedUser" });
+      if (result) {
+        this.checkeduser = result.inner;
+      }
     },
     async Calculation() {
       const result = await postHttp({ url: "/record/home/calculation" });
       if (result) {
-        this.monthAmt = result.inner.monthamt;
-        this.totalAmt = result.inner.totalamt;
+        this.monthAmt = result.inner.monthamt==null?0:result.inner.monthamt;
+        this.totalAmt = result.inner.totalamt==null?0:result.inner.totalamt;
         this.totalNum = result.inner.totalcount;
       }
     },
     async loginRecord() {
       const result = await postHttp({ url: "/record/home/logininfo" });
-      if (result&&result.inner) {
+      if (result && result.inner) {
         this.loginIp = result.inner[0].ip;
         this.loginTime = result.inner[0].create_time;
       }
