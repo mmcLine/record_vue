@@ -13,7 +13,7 @@ if (process.env.NODE_ENV === 'production') {
   // 正式版本
   httpHost = 'http://47.98.146.93:22000';
 } else if (process.env.NODE_ENV === 'test-dev' || process.env.NODE_ENV === 'development') {
-  httpHost = 'http://47.98.146.93:22000';
+  httpHost = 'http://localhost:22000';
 }
 // console.log('http env: ', process.env.NODE_ENV)
 

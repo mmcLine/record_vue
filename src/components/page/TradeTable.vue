@@ -8,6 +8,21 @@
         <div class="container">
             <div class="handle-box">
                 <el-button size="small" @click="handleAdd()">新增</el-button>
+                <el-button size="small" @click="downexcel()">
+                  <i class="iconfont icon-excelwenjian"></i>
+                  下载模板
+                </el-button>
+                <el-upload
+                  ref="upload"
+                  class="upload-demo"
+                  :action="UploadUrl()"
+                  :on-success="importsuccess"
+                  style="display: inline-block;"
+                >
+                <button class="tradeTableImport"><i class="iconfont icon-daoru " ></i>
+                    导入
+                </button>
+                </el-upload>
                 <el-button type="primary" icon="delete" class="handle-del mr10" @click="delAll">批量删除</el-button>
                 <el-date-picker
                 v-model="tradeDatePeriod"
@@ -129,13 +144,14 @@
 
 <script>
 import { postHttp, httpHost } from "@/http";
+import axios from "axios";
 export default {
   name: "basetable",
   data() {
     return {
       url: "./static/vuetable.json",
-      totalPageSize:1,
-      tradeDatePeriod:"",
+      totalPageSize: 1,
+      tradeDatePeriod: "",
       tableData: [],
       typeOptions: [],
       cur_page: 1,
@@ -155,36 +171,40 @@ export default {
         remarks: ""
       },
       idx: -1,
-       pickerOptions2: {
-          shortcuts: [{
-            text: '最近一周',
+      pickerOptions2: {
+        shortcuts: [
+          {
+            text: "最近一周",
             onClick(picker) {
               const end = new Date();
               const start = new Date();
               start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
-              picker.$emit('pick', [start, end]);
+              picker.$emit("pick", [start, end]);
             }
-          }, {
-            text: '最近一个月',
+          },
+          {
+            text: "最近一个月",
             onClick(picker) {
               const end = new Date();
               const start = new Date();
               start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
-              picker.$emit('pick', [start, end]);
+              picker.$emit("pick", [start, end]);
             }
-          }, {
-            text: '最近三个月',
+          },
+          {
+            text: "最近三个月",
             onClick(picker) {
               const end = new Date();
               const start = new Date();
               start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
-              picker.$emit('pick', [start, end]);
+              picker.$emit("pick", [start, end]);
             }
-          }]
-        },
-        value6: '',
-        value7: ''
-      }
+          }
+        ]
+      },
+      value6: "",
+      value7: ""
+    };
   },
   created() {
     this.getData();
@@ -204,8 +224,8 @@ export default {
         }
         if (!is_del) {
           if (
-            (d.name.indexOf(this.select_word) > -1 ||
-              d.remarks.indexOf(this.select_word) > -1)
+            d.name.indexOf(this.select_word) > -1 ||
+            d.remarks.indexOf(this.select_word) > -1
           ) {
             return d;
           }
@@ -214,6 +234,48 @@ export default {
     }
   },
   methods: {
+    UploadUrl: function() {
+      return "/api/record/order/importExcel";
+    },
+    importsuccess(response, file, fileList) {
+      this.$refs.upload.clearFiles();
+      if (response.success == true) {
+        this.$message({
+          message: "导入成功!",
+          type: "success"
+        });
+        this.loading = true;
+        this.getData();
+      } else {
+        this.$message({
+          message: response.msg,
+          type: "success"
+        });
+      }
+    },
+    //下载模板
+    downexcel() {
+      var vuethis = this;
+      var bodyFormData = new FormData();
+      bodyFormData.set("excelName", "trade");
+      axios({
+        method: "post",
+        url: "/record/trade/downexcel",
+        data: bodyFormData,
+        responseType: "blob"
+      })
+        .then(({ data }) => {
+          var a = document.createElement("a");
+          var url = window.URL.createObjectURL(data);
+          a.href = url;
+          a.download = "记账导入模板.xlsx";
+          a.click();
+          window.URL.revokeObjectURL(url);
+        })
+        .catch(function(response) {
+          vuethis.$message.error("模板文件不存在，请联系管理员添加");
+        });
+    },
     // 分页导航
     handleCurrentChange(val) {
       this.cur_page = val;
@@ -230,19 +292,22 @@ export default {
           return;
         }
         this.tableData = result.inner;
-        this.totalPageSize=result.totalPageSize;
+        this.totalPageSize = result.totalPageSize;
       }
     },
     async showTradeType() {
       let url = "/record/tradeType/listCombo";
       const result = await postHttp({ url });
-      this.typeOptions =result.inner;
+      this.typeOptions = result.inner;
     },
-   async search() {
+    async search() {
       this.is_search = true;
-      var params={startDate:this.tradeDatePeriod[0],endDate:this.tradeDatePeriod[1]}
-      const result = await postHttp({ url:"/record/order/datelist",params });
-      this.tableData=result.inner;
+      var params = {
+        startDate: this.tradeDatePeriod[0],
+        endDate: this.tradeDatePeriod[1]
+      };
+      const result = await postHttp({ url: "/record/order/datelist", params });
+      this.tableData = result.inner;
     },
     formatter(row, column) {
       return row.address;
@@ -266,7 +331,15 @@ export default {
     handleAdd() {
       this.form = {
         name: "",
-        tradeDate: new Date(Date.UTC(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()+1)).toISOString().slice(0, 10),
+        tradeDate: new Date(
+          Date.UTC(
+            new Date().getFullYear(),
+            new Date().getMonth(),
+            new Date().getDate()
+          )
+        )
+          .toISOString()
+          .slice(0, 10),
         amt: "",
         tradeTypeId: "",
         remarks: ""
@@ -277,17 +350,17 @@ export default {
       this.idx = index;
       this.delVisible = true;
     },
-   async delAll() {
+    async delAll() {
       const length = this.multipleSelection.length;
       let str = "";
-      let pkeys="";
+      let pkeys = "";
       this.del_list = this.del_list.concat(this.multipleSelection);
 
       for (let i = 0; i < length; i++) {
         str += this.multipleSelection[i].name + " ";
-        pkeys+=this.multipleSelection[i].pkey+",";
+        pkeys += this.multipleSelection[i].pkey + ",";
       }
-       var params = {pkeys:pkeys,className:"Order"};
+      var params = { pkeys: pkeys, className: "Order" };
       this.delVisible = false;
       const result = await postHttp({ url: "record/del", params });
       if (!result) {
@@ -325,23 +398,49 @@ export default {
     },
     // 确定删除
     async deleteRow() {
-      var row=this.tableData.splice(this.idx, 1);
-       var params={pkeys:row[0].pkey,className:"Order"};
-        const result = await postHttp({ url: "record/del", params });
+      var row = this.tableData.splice(this.idx, 1);
+      var params = { pkeys: row[0].pkey, className: "Order" };
+      const result = await postHttp({ url: "record/del", params });
       if (!result) {
         return;
       }
-      
+
       this.$message.success("删除成功");
       this.delVisible = false;
     }
   }
 };
 </script>
+<style lang="less">
+.el-upload--text {
+  width: 80px;
+  height: 40px;
+  color: #fff;
+  background-color: #409eff;
+  border-color: #409eff;
+  height: 32px;
+  line-height: 32px;
+  display: inline-block;
+  //vertical-align:text-top;
+  margin-bottom: -10px;
+}
+</style>
 
 <style scoped>
+.tradeTableImport {
+  width: 80px;
+  height: 40px;
+  color: #fff;
+  background-color: #409eff;
+  border-color: #409eff;
+  height: 32px;
+  line-height: 32px;
+  display: inline-block;
+  margin-top: 0px;
+}
 .handle-box {
   margin-bottom: 20px;
+  display: inline-block;
 }
 
 .handle-select {

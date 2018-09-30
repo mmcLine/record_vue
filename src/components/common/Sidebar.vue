@@ -1,5 +1,5 @@
 <style lang="less">
-    @import url("//at.alicdn.com/t/font_849033_w17wrhbq9k9.css");
+    @import url("//at.alicdn.com/t/font_849033_hqj24opjl55.css");
 </style>
 <template>
     <div class="sidebar">
