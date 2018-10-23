@@ -2,27 +2,12 @@
     <div class="table">
         <div class="crumbs">
             <el-breadcrumb separator="/">
-                <el-breadcrumb-item><i class="el-icon-tickets"></i> 消费记录</el-breadcrumb-item>
+                <el-breadcrumb-item><i class="el-icon-tickets"></i> 盈利记录</el-breadcrumb-item>
             </el-breadcrumb>
         </div>
         <div class="container">
             <div class="handle-box">
                 <el-button size="small" @click="handleAdd()">新增</el-button>
-                <el-button size="small" @click="downexcel()">
-                  <i class="iconfont icon-excelwenjian"></i>
-                  下载模板
-                </el-button>
-                <el-upload
-                  ref="upload"
-                  class="upload-demo"
-                  :action="UploadUrl()"
-                  :on-success="importsuccess"
-                  style="display: inline-block;"
-                >
-                <button class="tradeTableImport"><i class="iconfont icon-daoru " ></i>
-                    导入
-                </button>
-                </el-upload>
                 <el-button type="primary" icon="delete" class="handle-del mr10" @click="delAll">批量删除</el-button>
                 <el-date-picker
                 v-model="tradeDatePeriod"
@@ -46,8 +31,6 @@
                 <el-table-column prop="trade_date" label="交易日期" width="120">
                 </el-table-column>
                 <el-table-column prop="amt" label="交易金额" width="120">
-                </el-table-column>
-                <el-table-column prop="trade_type_name" label="交易类型" width="120">
                 </el-table-column>
                 <el-table-column prop="remarks" label="备注" style="color:red">
                 </el-table-column>
@@ -78,17 +61,6 @@
                 <el-form-item label="金额">
                     <el-input v-model="form.amt"></el-input>
                 </el-form-item>
-                <el-form-item label="类型" >
-                     <el-select v-model="form.tradeTypeId" placeholder="请选择消费类型" style="width: 100%;">
-                    <el-option
-                    v-for="item in typeOptions"
-                    :key="item.pkey"
-                    :label="item.type_name"
-                    :value="item.pkey">
-                    </el-option>
-                </el-select>
-                </el-form-item>
-                
                 <el-form-item label="备注">
                     <el-input v-model="form.remarks"></el-input>
                 </el-form-item>
@@ -123,25 +95,8 @@
                       </template>
                     </el-autocomplete>
                      </el-form-item>
-              
-               
-                 <!-- yuancheng -->
-
-                 <!-- <el-form-item label="事项">
-                    <el-input v-model="form.name"></el-input>
-                </el-form-item> -->
                 <el-form-item label="金额">
                     <el-input v-model="form.amt"></el-input>
-                </el-form-item>
-                <el-form-item label="类型" >
-                     <el-select v-model="form.tradeTypeId" placeholder="请选择消费类型" style="width: 100%;">
-                    <el-option
-                    v-for="item in typeOptions"
-                    :key="item.pkey"
-                    :label="item.type_name"
-                    :value="item.pkey">
-                    </el-option>
-                </el-select>
                 </el-form-item>
                   <el-form-item label="日期">
                     <el-date-picker type="date" placeholder="选择日期" v-model="form.tradeDate" value-format="yyyy-MM-dd" style="width: 100%;"></el-date-picker>
@@ -194,7 +149,6 @@ export default {
         name: "",
         tradeDate: "",
         amt: "",
-        tradeTypeId: "",
         remarks: ""
       },
       idx: -1,
@@ -236,8 +190,6 @@ export default {
     this.getData();
   },
   mounted() {
-    this.showTradeType();
-    // debugger;
      this.loadAll();
   },
   computed: {
@@ -262,48 +214,6 @@ export default {
     }
   },
   methods: {
-    UploadUrl: function() {
-      return "/api/record/order/importExcel";
-    },
-    importsuccess(response, file, fileList) {
-      this.$refs.upload.clearFiles();
-      if (response.success == true) {
-        this.$message({
-          message: "导入成功!",
-          type: "success"
-        });
-        this.loading = true;
-        this.getData();
-      } else {
-        this.$message({
-          message: response.msg,
-          type: "success"
-        });
-      }
-    },
-    //下载模板
-    downexcel() {
-      var vuethis = this;
-      var bodyFormData = new FormData();
-      bodyFormData.set("excelName", "trade");
-      axios({
-        method: "post",
-        url: "/record/trade/downexcel",
-        data: bodyFormData,
-        responseType: "blob"
-      })
-        .then(({ data }) => {
-          var a = document.createElement("a");
-          var url = window.URL.createObjectURL(data);
-          a.href = url;
-          a.download = "记账导入模板.xlsx";
-          a.click();
-          window.URL.revokeObjectURL(url);
-        })
-        .catch(function(response) {
-          vuethis.$message.error("模板文件不存在，请联系管理员添加");
-        });
-    },
     // 分页导航
     handleCurrentChange(val) {
       this.cur_page = val;
@@ -315,7 +225,7 @@ export default {
         const params = {
           pageNo: this.cur_page
         };
-        const result = await postHttp({ url: "/record/order/list", params });
+        const result = await postHttp({ url: "/record/profit/list", params });
         if (!result) {
           return;
         }
@@ -323,18 +233,13 @@ export default {
         this.totalPageSize = result.totalPageSize;
       }
     },
-    async showTradeType() {
-      let url = "/record/tradeType/listCombo";
-      const result = await postHttp({ url });
-      this.typeOptions = result.inner;
-    },
     async search() {
       this.is_search = true;
       var params = {
         startDate: this.tradeDatePeriod[0],
         endDate: this.tradeDatePeriod[1]
       };
-      const result = await postHttp({ url: "/record/order/datelist", params });
+      const result = await postHttp({ url: "/record/profit/datelist", params });
       this.tableData = result.inner;
     },
     filterTag(value, row) {
@@ -348,7 +253,6 @@ export default {
         name: item.name,
         tradeDate: item.trade_date,
         amt: item.amt,
-        tradeTypeId: item.trade_type_id,
         remarks: item.remarks
       };
       this.editVisible = true;
@@ -366,7 +270,6 @@ export default {
           .toISOString()
           .slice(0, 10),
         amt: "",
-        tradeTypeId: "",
         remarks: ""
       };
       this.addVisible = true;
@@ -402,7 +305,7 @@ export default {
     async saveAdd() {
       var params = this.form;
       this.addVisible = false;
-      const result = await postHttp({ url: "/record/order/save", params });
+      const result = await postHttp({ url: "/record/profit/save", params });
       if (!result) {
         return;
       }
@@ -414,7 +317,7 @@ export default {
       // this.$set(this.tableData, this.idx, this.form);
       var params = this.form;
       this.editVisible = false;
-      const result = await postHttp({ url: "/record/order/save", params });
+      const result = await postHttp({ url: "/record/profit/save", params });
       if (!result) {
         return;
       }
@@ -424,7 +327,7 @@ export default {
     // 确定删除
     async deleteRow() {
       var row = this.tableData.splice(this.idx, 1);
-      var params = { pkeys: row[0].pkey, className: "Order" };
+      var params = { pkeys: row[0].pkey, className: "Profit" };
       const result = await postHttp({ url: "record/del", params });
       if (!result) {
         return;
@@ -445,7 +348,7 @@ export default {
         };
       },
      async loadAll() {
-         const result =await postHttp({ url: "/record/order/names" });
+         const result =await postHttp({ url: "/record/profit/names" });
         if (!result) {
           return;
         }

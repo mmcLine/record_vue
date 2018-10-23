@@ -48,6 +48,10 @@
                                 index: 'trade_list',
                                 title: '消费记录'
                             },
+                             {
+                                index: 'profit_list',
+                                title: '收入记录'
+                            },
                             {
                                 index: 'study_list',
                                 title: '学习记录'

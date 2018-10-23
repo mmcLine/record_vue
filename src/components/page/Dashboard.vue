@@ -15,6 +15,14 @@
                             <div class="user-info-list">上次登录时间：<span>{{loginTime}}</span></div>
                             <div class="user-info-list">上次登录Ip：<span>{{loginIp}}</span></div>
                         </el-card>
+                         <el-card shadow="hover">
+                            <div slot="header" class="clearfix">
+                                <span>座右铭</span>
+                            </div>
+                            <p style="color:red">
+                               书山有路勤为径，学海无涯苦作舟;<br>
+                            </p>
+                        </el-card>
                         <el-card shadow="hover">
                             <div slot="header" class="clearfix">
                                 <span>查询范围</span>

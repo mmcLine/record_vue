@@ -4,7 +4,7 @@
         <div class="collapse-btn" @click="collapseChage">
             <i class="el-icon-menu"></i>
         </div>
-        <div class="logo">后台管理系统</div>
+        <div class="logo">记录美好生活</div>
         <div class="header-right">
             <div class="header-user-con">
                 <!-- 全屏显示 -->

@@ -76,7 +76,7 @@
                     <el-input v-model="form.aim"></el-input>
                 </el-form-item>
                 <el-form-item label="开始日期">
-                    <el-date-picker type="date" placeholder="选择日期" v-model="form.startDate" value-format="yyyy-MM-dd" style="width: 100%;" disabled=""></el-date-picker>
+                    <el-date-picker type="date" placeholder="选择日期" v-model="form.startDate" value-format="yyyy-MM-dd" style="width: 100%;"></el-date-picker>
                 </el-form-item>
                 <el-form-item label="计划结束日期">
                     <el-date-picker type="date" placeholder="选择日期" v-model="form.endDate" value-format="yyyy-MM-dd" style="width: 100%;"></el-date-picker>

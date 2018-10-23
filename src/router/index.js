@@ -30,6 +30,11 @@ export default new Router({
                     meta: { title: '消费记录' }
                 },
                 {
+                    path: '/profit_list',
+                    component: resolve => require(['../components/page/ProfitTable.vue'], resolve),
+                    meta: { title: '收入记录' }
+                },
+                {
                     path: '/tradeType_list',
                     component: resolve => require(['../components/page/TradeType.vue'], resolve),
                     meta: { title: '消费类型' }
